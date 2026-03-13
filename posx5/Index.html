@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="lo" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍞 Bakery POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="pos-layout">
+
+  <!-- ── HEADER ── -->
+  <header class="pos-header">
+    <div class="pos-header-brand">
+      <div class="brand-icon">🍞</div>
+      <div>
+        <h1>Bakery POS</h1>
+        <span class="brand-sub">ໂຮງຮຽນ · ລະບົບຂາຍສິນຄ້າ</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="time-badge" id="clock"></span>
+      <span class="user-chip">👤 <span id="username-display"></span></span>
+      <button class="theme-toggle" id="theme-toggle" title="ສະຫຼັບ ມືດ/ສວ່າງ" onclick="toggleTheme()">🌙</button>
+      <a href="admin-login.html" class="btn btn-secondary" style="padding:8px 13px;font-size:0.8rem;">📊 Admin</a>
+      <button class="btn btn-danger" style="padding:8px 13px;font-size:0.8rem;" onclick="AUTH.logoutUser()">ອອກ</button>
+    </div>
+  </header>
+
+  <!-- ── PRODUCT MENU ── -->
+  <main class="pos-menu">
+    <!-- Search bar -->
+    <div class="search-bar-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="product-search" class="search-input" placeholder="ຄົ້ນຫາສິນຄ້າ... Search products...">
+    </div>
+    <div class="menu-grid" id="menu-grid"></div>
+  </main>
+
+  <!-- ── CART PANEL ── -->
+  <aside class="pos-cart">
+    <div class="cart-header">
+      <h2>🛒 ລາຍການ</h2>
+      <span class="cart-count" id="cart-count">0</span>
+    </div>
+
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty">
+        <span class="empty-icon">🧺</span>
+        <span>ຍັງບໍ່ມີລາຍການ</span>
+        <small style="color:var(--text3);">ກົດເລືອກສິນຄ້າ</small>
+      </div>
+    </div>
+
+    <div class="cart-footer">
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="total-row">
+          <span>ລາຄາກ່ອນ VAT</span>
+          <span id="subtotal-display" class="mono">0 KIP</span>
+        </div>
+        <div class="total-row">
+          <span>ພາສີ VAT (10%)</span>
+          <span id="vat-display" class="mono">0 KIP</span>
+        </div>
+        <div class="total-row grand">
+          <span>ທັງໝົດ</span>
+          <span id="total-display" class="mono">0 KIP</span>
+        </div>
+      </div>
+
+      <!-- Payment type -->
+      <div class="payment-type">
+        <button class="pay-btn active" id="pay-cash">💵 ເງິນສົດ</button>
+        <button class="pay-btn" id="pay-transfer">📲 ໂອນເງິນ</button>
+      </div>
+
+      <!-- Cash received -->
+      <div class="cash-input-section visible" id="cash-input-section">
+        <label>ຈຳນວນເງິນທີ່ຮັບ (KIP)</label>
+        <input type="number" id="cash-received" placeholder="0" min="0" step="1000">
+      </div>
+
+      <!-- Change -->
+      <div class="change-display" id="change-display">
+        <span class="change-label">ເງິນທອນ</span>
+        <span class="change-amount" id="change-amount">0 KIP</span>
+      </div>
+
+      <!-- Action buttons -->
+      <button class="btn-checkout" id="btn-checkout" disabled>✅ ຊຳລະເງິນ</button>
+      <button class="btn-cancel-order" id="btn-cancel-order" disabled>✕ ຍົກເລີກລາຍການ</button>
+    </div>
+  </aside>
+
+</div><!-- /pos-layout -->
+
+<!-- ── SUCCESS MODAL ── -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal">
+    <span class="modal-icon">🎉</span>
+    <h2>ຊຳລະສຳເລັດ!</h2>
+    <p>ຂໍຂອບໃຈທີ່ໃຊ້ບໍລິການ 🍞</p>
+
+    <div class="receipt-details">
+      <div class="receipt-row" style="margin-bottom:4px;">
+        <span style="color:var(--text3);font-size:0.75rem;">ໃບບິນ</span>
+        <span id="receipt-order-id" class="mono" style="font-weight:800;color:var(--accent);"></span>
+      </div>
+      <div class="receipt-row"><span>ສິນຄ້າ</span>
+        <span id="receipt-items" style="text-align:right;max-width:190px;font-size:0.77rem;"></span>
+      </div>
+      <div class="receipt-row">
+        <span>ລາຄາລວມ</span><span id="receipt-subtotal" class="mono"></span>
+      </div>
+      <div class="receipt-row">
+        <span>VAT 10%</span><span id="receipt-vat" class="mono"></span>
+      </div>
+      <div class="receipt-row total">
+        <span>ທັງໝົດ</span><span id="receipt-total" class="mono"></span>
+      </div>
+      <div class="receipt-row" id="receipt-change-row">
+        <span>ເງິນທອນ</span>
+        <span id="receipt-change" class="mono" style="color:var(--green);font-weight:800;"></span>
+      </div>
+      <div class="receipt-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:9px;">
+        <span>ການຊຳລະ</span><span id="receipt-payment"></span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn btn-secondary" id="btn-print-receipt" style="padding:12px;">🖨 ພິມໃບບິນ</button>
+      <button class="btn btn-primary" id="btn-new-order" style="padding:12px;">🆕 ລາຍການໃໝ່</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/auth.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/pos.js"></script>
+<script src="js/payment.js"></script>
+<script src="js/receipt.js"></script>
+<script>
+  // Theme restore
+  (function() {
+    const saved = localStorage.getItem('pos_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+    });
+  })();
+
+  function toggleTheme() {
+    const html   = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-toggle').textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('pos_theme', isDark ? 'light' : 'dark');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    POS.init();
+    PAYMENT.init();
+  });
+</script>
+</body>
+</html>
