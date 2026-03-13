@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="lo" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login · Bakery POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="emoji-stack">🔐</span>
+      <h1>Admin Dashboard</h1>
+      <p>ລະບົບຈັດການຮ້ານ</p>
+    </div>
+
+    <div style="text-align:center;margin-bottom:22px;">
+      <span class="auth-badge" style="background:rgba(139,107,177,0.12);color:var(--purple);border-color:rgba(139,107,177,0.25);">
+        🛡 ຜູ້ດູແລລະບົບ
+      </span>
+    </div>
+
+    <div id="error-msg" class="auth-error"></div>
+
+    <div class="form-group">
+      <label>Admin Username</label>
+      <input type="text" id="username" placeholder="Admin username" autocomplete="username">
+    </div>
+
+    <div class="form-group">
+      <label>Admin Password</label>
+      <input type="password" id="password" placeholder="Admin password" autocomplete="current-password">
+    </div>
+
+    <button class="btn" style="width:100%;padding:14px;font-size:1rem;background:var(--purple);color:#fff;" onclick="doAdminLogin()">
+      🔐 Admin Login
+    </button>
+
+    <div class="auth-link" style="margin-top:20px;">
+      <a href="login.html">← ກັບໄປໜ້າ POS</a>
+    </div>
+
+    <div class="demo-hint">
+      <strong>Demo Admin:</strong><br>
+      ຜູ້ໃຊ້: <code>admin</code> &nbsp;|&nbsp; ລະຫັດ: <code>admin2024</code>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/sounds.js"></script>
+  <script>
+    const t = localStorage.getItem('pos_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', t);
+
+    if (AUTH.isAdminLoggedIn()) window.location.href = 'admin.html';
+
+    function doAdminLogin() {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value;
+      const err = document.getElementById('error-msg');
+      if (!u || !p) {
+        err.style.display='block';
+        err.textContent='❌ ກະລຸນາໃສ່ຂໍ້ມູນ';
+        SOUNDS.playError();
+        return;
+      }
+      if (AUTH.loginAdmin(u, p)) {
+        // Play login sound, then redirect after it finishes (~500ms)
+        SOUNDS.playLogin();
+        setTimeout(() => { window.location.href = 'admin.html'; }, 500);
+      } else {
+        err.style.display='block';
+        err.textContent='❌ ຂໍ້ມູນ Admin ບໍ່ຖືກຕ້ອງ';
+        document.getElementById('password').value = '';
+        SOUNDS.playError();
+      }
+    }
+    document.addEventListener('keydown', e => { if (e.key==='Enter') doAdminLogin(); });
+  </script>
+</body>
+</html>
